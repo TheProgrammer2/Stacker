@@ -7,6 +7,7 @@ package GUI;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 /**
  *
@@ -30,8 +31,13 @@ public class Game_GUI extends javax.swing.JFrame {
 
     @Override
     public void paint(Graphics g) {
-        Graphics2D g2d = (Graphics2D) pnlScreen.getGraphics();
-        g2d.fillRect(0, 0, blockWidth, blockWidth);
+        BufferedImage img = (BufferedImage) createImage(pnlScreen.getWidth(), pnlScreen.getWidth());
+        Graphics2D g2d = (Graphics2D) img.getGraphics();
+        //painting starts here
+        
+
+        g2d = (Graphics2D) pnlScreen.getGraphics();
+        g2d.drawImage(img, 0, 0, pnlScreen);
     }
 
     /**
