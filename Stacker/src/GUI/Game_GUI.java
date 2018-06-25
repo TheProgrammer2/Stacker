@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
 
 /**
  *
@@ -16,15 +17,12 @@ import java.awt.image.BufferedImage;
  */
 public class Game_GUI extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Game
-     */
-    int[][] fixedblocks = new int[20][10];
+    int[][] fixedblocks = new int[10][10];
     int[] movingBlock = new int[10];
 
-    int blockWidth = 20;
-
+    int blockWidth = 50;
     int borderLeft;
+    LinkedList<Integer> fallingBlocks = new LinkedList<>();
 
     public Game_GUI() {
         initComponents();
@@ -62,6 +60,11 @@ public class Game_GUI extends javax.swing.JFrame {
         pnlScreen = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                onResize(evt);
+            }
+        });
 
         javax.swing.GroupLayout pnlScreenLayout = new javax.swing.GroupLayout(pnlScreen);
         pnlScreen.setLayout(pnlScreenLayout);
@@ -78,6 +81,10 @@ public class Game_GUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void onResize(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_onResize
+        borderLeft = (pnlScreen.getWidth() - fixedblocks[0].length * blockWidth) / 2;
+    }//GEN-LAST:event_onResize
 
     /**
      * @param args the command line arguments
