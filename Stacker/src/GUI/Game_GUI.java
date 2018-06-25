@@ -10,6 +10,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  *
@@ -17,16 +19,51 @@ import java.util.LinkedList;
  */
 public class Game_GUI extends javax.swing.JFrame {
 
-    int[][] fixedblocks = new int[10][10];
-    int[] movingBlock = new int[10];
+    int[][] fixedBlocks = new int[10][10];
+    int[] movingBlocks = new int[10];
+
+    int leftMoving = 0;
+    long movingSpeed = 5;
+    boolean moveRight = true;
+    int topMoving;
 
     int blockWidth = 50;
+    int boundary;
     int borderLeft;
+    int numberOfBlocks;
+
     LinkedList<Integer> fallingBlocks = new LinkedList<>();
 
     public Game_GUI() {
         initComponents();
-        borderLeft = (pnlScreen.getWidth() - fixedblocks[0].length * blockWidth) / 2;
+        borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
+        boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
+        numberOfBlocks = pnlScreen.getWidth() / blockWidth;
+        topMoving = blockWidth * fixedBlocks.length; //change to the upper block later
+        Timer moveTimer = new Timer();
+        moveTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (moveRight) {
+                    leftMoving++;
+                    if (leftMoving + movingBlocks.length >= numberOfBlocks) {
+                        moveRight = false;
+                    }
+                } else {
+                    leftMoving--;
+                    if (leftMoving == 0) {
+                        moveRight = true;
+                    }
+                }
+            }
+        }, 0, movingSpeed);
+        Timer updateTimer = new Timer();
+        updateTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                repaint();
+            }
+        }, 0, 5);
     }
 
     @Override
@@ -34,14 +71,19 @@ public class Game_GUI extends javax.swing.JFrame {
         BufferedImage img = (BufferedImage) createImage(pnlScreen.getWidth(), pnlScreen.getWidth());
         Graphics2D g2d = (Graphics2D) img.getGraphics();
 
-        //painting starts here
-        for (int z = 0; z < fixedblocks.length; z++) {
-            for (int s = 0; s < fixedblocks[0].length; s++) {
+        // painting the fixed blocks
+        for (int z = 0; z < fixedBlocks.length; z++) {
+            for (int s = 0; s < fixedBlocks[0].length; s++) {
                 g2d.fillRect(borderLeft + s * blockWidth, pnlScreen.getHeight() - z * blockWidth - blockWidth, blockWidth, blockWidth);
                 g2d.setColor(Color.yellow);
                 g2d.drawRect(borderLeft + s * blockWidth, pnlScreen.getHeight() - z * blockWidth - blockWidth, blockWidth, blockWidth);
                 g2d.setColor(Color.black);
             }
+        }
+
+        // painting the moving blocks
+        for (int i = 0; i < movingBlocks.length; i++) {
+            g2d.fillRect(boundary + blockWidth * (leftMoving + i), topMoving, blockWidth, blockWidth);
         }
 
         g2d = (Graphics2D) pnlScreen.getGraphics();
@@ -83,7 +125,9 @@ public class Game_GUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void onResize(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_onResize
-        borderLeft = (pnlScreen.getWidth() - fixedblocks[0].length * blockWidth) / 2;
+        borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
+        numberOfBlocks = pnlScreen.getWidth() / blockWidth;
+        boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
     }//GEN-LAST:event_onResize
 
     /**
