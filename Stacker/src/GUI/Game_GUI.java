@@ -38,10 +38,11 @@ public class Game_GUI extends javax.swing.JFrame {
 
     int fallingspeed = 10;
     LinkedList<FallingBlock> fallingBlocks = new LinkedList<>();
+    int score = 0;
 
     public Game_GUI() {
         initComponents();
-        AudioPlayer.playLoopAsync("bgm1");
+        AudioPlayer.playLoopAsync("bgm6");
         this.setExtendedState(MAXIMIZED_BOTH);
         borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
         boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
@@ -95,6 +96,7 @@ public class Game_GUI extends javax.swing.JFrame {
                             // there is a fixed block underneath so it now is a fixed block and can be removed as falling block
                             if (fixedBlocks[zeile - 1][spalte] == 1) {
                                 fixedBlocks[zeile][spalte] = 1;
+                                AudioPlayer.playAsync("blockplace");
                                 toRemove.add(f);
                             }
                         }
