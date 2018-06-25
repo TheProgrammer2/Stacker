@@ -30,7 +30,9 @@ public class AudioPlayer {
     public static HashMap<String,Thread> threads = new HashMap<>();
     private static List<String> loopQueue = new LinkedList<>();
     private static boolean looping = false;
-    private static boolean loopReset = false;
+    private static HashMap<String,Boolean> loopReset = new HashMap<>();
+    private static String loopingAudio;
+    private static String currentAudio;
     private static boolean loopInterrupt = false;
     private static boolean loopRunning = false;
     
@@ -59,13 +61,13 @@ public class AudioPlayer {
     
     public static void softLoopEnd() {
         looping = false;
-        loopReset = false;
+        loopReset.put(loopingAudio, false);
     }
     
     public static void hardLoopEnd() {
         looping = false;
         loopInterrupt = true;
-        loopReset = false;
+        loopReset.put(loopingAudio, false);
     }
     
     public static void playLoopAsync(String filename) {
@@ -73,15 +75,16 @@ public class AudioPlayer {
             loopQueue.add(filename);
             return;
         }
+        loopingAudio = filename;
         loopRunning = true;
         looping = true;
-        loopReset = true;
+        loopReset.put(filename, true);
         Thread loopThread = new Thread(new Runnable() {
             public void run() {
                 while(looping) {
-                    if(loopReset) {
+                    if(loopReset.get(filename)) {
                         playAsync(filename);
-                        loopReset = false;
+                        loopReset.put(filename, false);
                     }
                     if(loopInterrupt) {
                         endAudio(filename);
@@ -123,12 +126,14 @@ public class AudioPlayer {
     }
     
     public static void playAsync(String filename) {
+        currentAudio = filename;
         File audio = new File(PATH + filename + ".wav");
         if(audio.exists()) {
             Thread audioThread = new Thread(new Runnable() {
                 public void run() {
                     playAudio(audio);
                     threads.remove(filename);
+                    currentAudio = loopingAudio;
                 }
             });
             threads.put(filename, audioThread);
@@ -165,7 +170,7 @@ public class AudioPlayer {
         } catch(IOException e) {
             System.out.println("Error playing sound: " + e.getMessage());
         }
-        loopReset = true;
+        loopReset.put(currentAudio, true);
         loopRunning = false;
     }
     
