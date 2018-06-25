@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -23,10 +25,75 @@ public class AudioPlayer {
     
     public static final String PATH = System.getProperty("user.dir") + File.separator +
             "src" + File.separator +
-            "res" + File.separator +
-            "audio" + File.separator;
+            "res" + File.separator;
     
     public static HashMap<String,Thread> threads = new HashMap<>();
+    private static List<String> loopQueue = new LinkedList<>();
+    private static boolean looping = false;
+    private static boolean loopReset = false;
+    private static boolean loopInterrupt = false;
+    private static boolean loopRunning = false;
+    
+    private static Thread queueThread;
+    private static boolean handleQueue = true;
+    
+    static {
+        queueThread = new Thread(new Runnable() {
+            public void run() {
+                while(handleQueue) {
+                    if(loopQueue.size() > 0) {
+                        softLoopEnd();
+                        if(!loopRunning) {
+                            playLoopAsync(loopQueue.get(0));
+                            loopQueue.remove(0);
+                        }
+                    }
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException ex) { }
+                }
+            }
+        });
+        queueThread.start();
+    }
+    
+    public static void softLoopEnd() {
+        looping = false;
+        loopReset = false;
+    }
+    
+    public static void hardLoopEnd() {
+        looping = false;
+        loopInterrupt = true;
+        loopReset = false;
+    }
+    
+    public static void playLoopAsync(String filename) {
+        if(loopRunning) {
+            loopQueue.add(filename);
+            return;
+        }
+        loopRunning = true;
+        looping = true;
+        loopReset = true;
+        Thread loopThread = new Thread(new Runnable() {
+            public void run() {
+                while(looping) {
+                    if(loopReset) {
+                        playAsync(filename);
+                        loopReset = false;
+                    }
+                    if(loopInterrupt) {
+                        endAudio(filename);
+                    }
+                    try {
+                        Thread.sleep(1);
+                    } catch (InterruptedException ex) { }
+                }
+            }
+        });
+        loopThread.start();
+    }
     
     public static void endAllAudio() {
         while(threads.keySet().size() > 0) {
@@ -61,6 +128,7 @@ public class AudioPlayer {
             Thread audioThread = new Thread(new Runnable() {
                 public void run() {
                     playAudio(audio);
+                    threads.remove(filename);
                 }
             });
             threads.put(filename, audioThread);
@@ -85,20 +153,20 @@ public class AudioPlayer {
             Clip clip = AudioSystem.getClip();
             clip.addLineListener(listener);
             clip.open(stream);
-            try {
-                clip.start();
-                listener.waitUntilDone();
-            } catch(InterruptedException e) {
-                System.out.println("Interrupted playing sound: " + e.getMessage());
+            clip.start();
+            while(!listener.isDone()) {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException ex) { }
             }
-            finally {
-                clip.close();
-            }
+            clip.stop();
         } catch(LineUnavailableException e) {
             System.out.println("Line Listener unavailable: " + e.getMessage());
         } catch(IOException e) {
             System.out.println("Error playing sound: " + e.getMessage());
         }
+        loopReset = true;
+        loopRunning = false;
     }
     
 }

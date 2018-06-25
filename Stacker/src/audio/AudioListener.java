@@ -15,19 +15,16 @@ import javax.sound.sampled.LineEvent.Type;
 public class AudioListener implements LineListener {
 
     private boolean done = false;
+
+    public boolean isDone() {
+        return done;
+    }
     
     @Override
     public void update(LineEvent event) {
         Type eventType = event.getType();
-        if(eventType == Type.STOP || eventType == Type.CLOSE) {
+        if(eventType == Type.STOP)
             done = true;
-            notifyAll();
-        }
-    }
-    
-    public synchronized void waitUntilDone() throws InterruptedException {
-        while(!done)
-            wait();
     }
     
 }
