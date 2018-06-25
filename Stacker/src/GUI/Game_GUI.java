@@ -6,6 +6,7 @@
 package GUI;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -23,7 +24,7 @@ public class Game_GUI extends javax.swing.JFrame {
     int[] movingBlocks = new int[10];
 
     int leftMoving = 0;
-    long movingSpeed = 5;
+    long movingSpeed = 80;
     boolean moveRight = true;
     int topMoving;
 
@@ -36,10 +37,17 @@ public class Game_GUI extends javax.swing.JFrame {
 
     public Game_GUI() {
         initComponents();
+        this.setExtendedState(MAXIMIZED_BOTH);
         borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
         boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
         numberOfBlocks = pnlScreen.getWidth() / blockWidth;
         topMoving = blockWidth * fixedBlocks.length; //change to the upper block later
+
+        // init the base row
+        for (int i = 0; i < fixedBlocks[0].length; i++) {
+            fixedBlocks[0][i] = 1;
+        }
+
         Timer moveTimer = new Timer();
         moveTimer.schedule(new TimerTask() {
             @Override
@@ -74,10 +82,12 @@ public class Game_GUI extends javax.swing.JFrame {
         // painting the fixed blocks
         for (int z = 0; z < fixedBlocks.length; z++) {
             for (int s = 0; s < fixedBlocks[0].length; s++) {
-                g2d.fillRect(borderLeft + s * blockWidth, pnlScreen.getHeight() - z * blockWidth - blockWidth, blockWidth, blockWidth);
-                g2d.setColor(Color.yellow);
-                g2d.drawRect(borderLeft + s * blockWidth, pnlScreen.getHeight() - z * blockWidth - blockWidth, blockWidth, blockWidth);
-                g2d.setColor(Color.black);
+                if (fixedBlocks[z][s] == 1) {
+                    g2d.fillRect(borderLeft + s * blockWidth, pnlScreen.getHeight() - z * blockWidth - blockWidth, blockWidth, blockWidth);
+                    g2d.setColor(Color.yellow);
+                    g2d.drawRect(borderLeft + s * blockWidth, pnlScreen.getHeight() - z * blockWidth - blockWidth, blockWidth, blockWidth);
+                    g2d.setColor(Color.black);
+                }
             }
         }
 
