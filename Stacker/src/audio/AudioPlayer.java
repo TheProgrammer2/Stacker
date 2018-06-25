@@ -22,56 +22,57 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  * @author MikaF
  */
 public class AudioPlayer {
-    
-    public static final String PATH = System.getProperty("user.dir") + File.separator +
-            "src" + File.separator +
-            "res" + File.separator;
-    
-    public static HashMap<String,Thread> threads = new HashMap<>();
+
+    public static final String PATH = System.getProperty("user.dir") + File.separator
+            + "src" + File.separator
+            + "res" + File.separator;
+
+    public static HashMap<String, Thread> threads = new HashMap<>();
     private static List<String> loopQueue = new LinkedList<>();
     private static boolean looping = false;
-    private static HashMap<String,Boolean> loopReset = new HashMap<>();
+    private static HashMap<String, Boolean> loopReset = new HashMap<>();
     private static String loopingAudio;
     private static String currentAudio;
     private static boolean loopInterrupt = false;
     private static boolean loopRunning = false;
-    
+
     private static Thread queueThread;
     private static boolean handleQueue = true;
-    
+
     static {
         queueThread = new Thread(new Runnable() {
             public void run() {
-                while(handleQueue) {
-                    if(loopQueue.size() > 0) {
+                while (handleQueue) {
+                    if (loopQueue.size() > 0) {
                         softLoopEnd();
-                        if(!loopRunning) {
+                        if (!loopRunning) {
                             playLoopAsync(loopQueue.get(0));
                             loopQueue.remove(0);
                         }
                     }
                     try {
                         Thread.sleep(1);
-                    } catch (InterruptedException ex) { }
+                    } catch (InterruptedException ex) {
+                    }
                 }
             }
         });
         queueThread.start();
     }
-    
+
     public static void softLoopEnd() {
         looping = false;
         loopReset.put(loopingAudio, false);
     }
-    
+
     public static void hardLoopEnd() {
         looping = false;
         loopInterrupt = true;
         loopReset.put(loopingAudio, false);
     }
-    
+
     public static void playLoopAsync(String filename) {
-        if(loopRunning) {
+        if (loopRunning) {
             loopQueue.add(filename);
             return;
         }
@@ -81,54 +82,57 @@ public class AudioPlayer {
         loopReset.put(filename, true);
         Thread loopThread = new Thread(new Runnable() {
             public void run() {
-                while(looping) {
-                    if(loopReset.get(filename)) {
+                while (looping) {
+                    if (loopReset.get(filename)) {
                         playAsync(filename);
                         loopReset.put(filename, false);
                     }
-                    if(loopInterrupt) {
+                    if (loopInterrupt) {
                         endAudio(filename);
                     }
                     try {
                         Thread.sleep(1);
-                    } catch (InterruptedException ex) { }
+                    } catch (InterruptedException ex) {
+                    }
                 }
             }
         });
         loopThread.start();
     }
-    
+
     public static void endAllAudio() {
-        while(threads.keySet().size() > 0) {
+        while (threads.keySet().size() > 0) {
             try {
-                for(String audio : threads.keySet()) {
+                for (String audio : threads.keySet()) {
                     threads.get(audio).interrupt();
                     threads.remove(audio);
                 }
-            } catch(ConcurrentModificationException e) { }
+            } catch (ConcurrentModificationException e) {
+            }
         }
-        
+
     }
-    
+
     public static void endAudio(String filename) {
-        if(threads.containsKey(filename)) {
+        if (threads.containsKey(filename)) {
             threads.get(filename).interrupt();
             threads.remove(filename);
         }
     }
-    
+
     public static void playSync(String filename) {
         File audio = new File(PATH + filename + ".wav");
-        if(audio.exists())
+        if (audio.exists()) {
             playAudio(audio);
-        else
+        } else {
             System.out.println("Unknown audio file: " + filename);
+        }
     }
-    
+
     public static void playAsync(String filename) {
         currentAudio = filename;
         File audio = new File(PATH + filename + ".wav");
-        if(audio.exists()) {
+        if (audio.exists()) {
             Thread audioThread = new Thread(new Runnable() {
                 public void run() {
                     playAudio(audio);
@@ -138,40 +142,43 @@ public class AudioPlayer {
             });
             threads.put(filename, audioThread);
             audioThread.start();
-        } else
+        } else {
             System.out.println("Unknown audio file: " + filename);
+        }
     }
-    
+
     private static void playAudio(File audio) {
         AudioListener listener = new AudioListener();
         AudioInputStream stream = null;
         try {
             stream = AudioSystem.getAudioInputStream(audio);
-        } catch(IOException e) {
+        } catch (IOException e) {
             System.out.println("Error playing sound: " + e.getMessage());
-        } catch(UnsupportedAudioFileException e) {
+        } catch (UnsupportedAudioFileException e) {
             System.out.println("Unsupported audio file: " + e.getMessage());
         }
-        if(stream == null)
+        if (stream == null) {
             return;
+        }
         try {
             Clip clip = AudioSystem.getClip();
             clip.addLineListener(listener);
             clip.open(stream);
             clip.start();
-            while(!listener.isDone()) {
+            while (!listener.isDone()) {
                 try {
                     Thread.sleep(1);
-                } catch (InterruptedException ex) { }
+                } catch (InterruptedException ex) {
+                }
             }
             clip.stop();
-        } catch(LineUnavailableException e) {
+        } catch (LineUnavailableException e) {
             System.out.println("Line Listener unavailable: " + e.getMessage());
-        } catch(IOException e) {
+        } catch (IOException e) {
             System.out.println("Error playing sound: " + e.getMessage());
         }
         loopReset.put(currentAudio, true);
         loopRunning = false;
     }
-    
+
 }
