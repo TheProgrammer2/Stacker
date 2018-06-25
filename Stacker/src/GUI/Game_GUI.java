@@ -5,6 +5,9 @@
  */
 package GUI;
 
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+
 /**
  *
  * @author Lukas
@@ -14,8 +17,21 @@ public class Game_GUI extends javax.swing.JFrame {
     /**
      * Creates new form Game
      */
+    int[][] fixedblocks = new int[10][20];
+    int[] movingBlock = new int[10];
+
+    int blockWidth = 20;
+    int highestBlockBottom = 0;
+    int movingBlockBottom = highestBlockBottom + blockWidth;
+
     public Game_GUI() {
         initComponents();
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        Graphics2D g2d = (Graphics2D) pnlScreen.getGraphics();
+        g2d.fillRect(0, 0, blockWidth, blockWidth);
     }
 
     /**
@@ -27,18 +43,22 @@ public class Game_GUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        pnlScreen = new javax.swing.JPanel();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout pnlScreenLayout = new javax.swing.GroupLayout(pnlScreen);
+        pnlScreen.setLayout(pnlScreenLayout);
+        pnlScreenLayout.setHorizontalGroup(
+            pnlScreenLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 400, Short.MAX_VALUE)
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        pnlScreenLayout.setVerticalGroup(
+            pnlScreenLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 300, Short.MAX_VALUE)
         );
+
+        getContentPane().add(pnlScreen, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -80,5 +100,6 @@ public class Game_GUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel pnlScreen;
     // End of variables declaration//GEN-END:variables
 }
