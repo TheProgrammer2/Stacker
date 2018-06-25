@@ -7,6 +7,8 @@ package audio;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -22,6 +24,27 @@ public class AudioPlayer {
     public static final String PATH = System.getProperty("user.dir") + File.separator +
             "src" + File.separator +
             "res" + File.separator;
+    
+    public static HashMap<String,Thread> threads = new HashMap<>();
+    
+    public static void endAllAudio() {
+        while(threads.keySet().size() > 0) {
+            try {
+                for(String audio : threads.keySet()) {
+                    threads.get(audio).interrupt();
+                    threads.remove(audio);
+                }
+            } catch(ConcurrentModificationException e) { }
+        }
+        
+    }
+    
+    public static void endAudio(String filename) {
+        if(threads.containsKey(filename)) {
+            threads.get(filename).interrupt();
+            threads.remove(filename);
+        }
+    }
     
     public static void playSync(String filename) {
         File audio = new File(PATH + filename + ".wav");
@@ -39,6 +62,7 @@ public class AudioPlayer {
                     playAudio(audio);
                 }
             });
+            threads.put(filename, audioThread);
             audioThread.start();
         } else
             System.out.println("Unknown audio file: " + filename);
