@@ -36,7 +36,7 @@ public class Game_GUI extends javax.swing.JFrame {
     int borderLeft;
     int numberOfBlocks;
 
-    int fallingspeed = 10;
+    int fallingspeed = 25;
     LinkedList<FallingBlock> fallingBlocks = new LinkedList<>();
     int score = 0;
 
@@ -90,7 +90,8 @@ public class Game_GUI extends javax.swing.JFrame {
                 for (FallingBlock f : fallingBlocks) {
                     if (topMoving + blockWidth == f.topY) { // is in the row where it should settle
                         f.done = true;
-                        if (borderLeft <= f.leftX && f.leftX < borderLeft + fixedBlocks[0].length * blockWidth) { // is in the range of the columns 0 - 9 of fixedBlocks
+                        // is in the range of the columns 0 - 9 of fixedBlocks
+                        if (borderLeft <= f.leftX && f.leftX < borderLeft + fixedBlocks[0].length * blockWidth) {
                             int zeile = (pnlScreen.getHeight() - (topMoving + 2 * blockWidth)) / blockWidth;
                             int spalte = (f.leftX - borderLeft) / blockWidth;
                             // there is a fixed block underneath so it now is a fixed block and can be removed as falling block
@@ -103,8 +104,10 @@ public class Game_GUI extends javax.swing.JFrame {
                     } else {
                         f.topY += 5;
                     }
-                    if (topMoving + blockWidth >= pnlScreen.getHeight()) {
+                    if (f.topY + blockWidth >= pnlScreen.getHeight()) { // passes the bottom of the window and gets removed
                         toRemove.add(f);
+                    } else {
+                        f.topY += 5;
                     }
                 }
                 for (FallingBlock f : toRemove) {
