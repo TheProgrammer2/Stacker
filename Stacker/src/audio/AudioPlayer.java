@@ -177,7 +177,8 @@ public class AudioPlayer {
         } catch (IOException e) {
             System.out.println("Error playing sound: " + e.getMessage());
         }
-        loopReset.put(currentAudio, true);
+        if(audio.getName().contains(loopingAudio))
+            loopReset.put(loopingAudio, true);
         loopRunning = false;
     }
 
