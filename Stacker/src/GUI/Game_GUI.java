@@ -5,9 +5,12 @@
  */
 package GUI;
 
+import audio.AudioPlayer;
+import beans.FallingBlock;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.Timer;
@@ -23,19 +26,22 @@ public class Game_GUI extends javax.swing.JFrame {
     int[] movingBlocks = new int[10];
 
     int leftMoving = 0;
-    long movingSpeed = 900;
+    long movingSpeed = 350;
     boolean moveRight = true;
     int topMoving;
+    boolean doesMove = true;
 
     int blockWidth = 50;
     int boundary;
     int borderLeft;
     int numberOfBlocks;
 
-    LinkedList<Integer> fallingBlocks = new LinkedList<>();
+    int fallingspeed = 10;
+    LinkedList<FallingBlock> fallingBlocks = new LinkedList<>();
 
     public Game_GUI() {
         initComponents();
+        AudioPlayer.playLoopAsync("bgm1");
         this.setExtendedState(MAXIMIZED_BOTH);
         borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
         boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
@@ -47,23 +53,6 @@ public class Game_GUI extends javax.swing.JFrame {
             fixedBlocks[0][i] = 1;
         }
 
-        Timer moveTimer = new Timer();
-        moveTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (moveRight) {
-                    leftMoving++;
-                    if (leftMoving + movingBlocks.length >= numberOfBlocks) {
-                        moveRight = false;
-                    }
-                } else {
-                    leftMoving--;
-                    if (leftMoving <= 0) {
-                        moveRight = true;
-                    }
-                }
-            }
-        }, movingSpeed, movingSpeed);
         Timer updateTimer = new Timer();
         updateTimer.schedule(new TimerTask() {
             @Override
@@ -71,6 +60,56 @@ public class Game_GUI extends javax.swing.JFrame {
                 repaint();
             }
         }, 0, 5);
+
+        Timer moveTimer = new Timer();
+        moveTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (doesMove) {
+                    if (moveRight) {
+                        leftMoving++;
+                        if (leftMoving + movingBlocks.length >= numberOfBlocks) {
+                            moveRight = false;
+                        }
+                    } else {
+                        leftMoving--;
+                        if (leftMoving <= 0) {
+                            moveRight = true;
+                        }
+                    }
+                }
+            }
+        }, movingSpeed, movingSpeed);
+
+        Timer fall = new Timer();
+        fall.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                LinkedList<FallingBlock> toRemove = new LinkedList<>();
+                for (FallingBlock f : fallingBlocks) {
+                    if (topMoving + blockWidth == f.topY) { // is in the row where it should settle
+                        f.done = true;
+                        if (borderLeft <= f.leftX && f.leftX < borderLeft + fixedBlocks[0].length * blockWidth) { // is in the range of the columns 0 - 9 of fixedBlocks
+                            int zeile = (pnlScreen.getHeight() - (topMoving + 2 * blockWidth)) / blockWidth;
+                            int spalte = (f.leftX - borderLeft) / blockWidth;
+                            // there is a fixed block underneath so it now is a fixed block and can be removed as falling block
+                            if (fixedBlocks[zeile - 1][spalte] == 1) {
+                                fixedBlocks[zeile][spalte] = 1;
+                                toRemove.add(f);
+                            }
+                        }
+                    } else {
+                        f.topY += 5;
+                    }
+                    if (topMoving + blockWidth >= pnlScreen.getHeight()) {
+                        toRemove.add(f);
+                    }
+                }
+                for (FallingBlock f : toRemove) {
+                    fallingBlocks.remove(f);
+                }
+            }
+        }, 0, fallingspeed);
     }
 
     @Override
@@ -91,12 +130,24 @@ public class Game_GUI extends javax.swing.JFrame {
         }
 
         // painting the moving blocks
-        for (int i = 0; i < movingBlocks.length; i++) {
-            g2d.fillRect(boundary + blockWidth * (leftMoving + i), topMoving, blockWidth, blockWidth);
+        if (doesMove) {
+            for (int i = 0; i < movingBlocks.length; i++) {
+                g2d.fillRect(boundary + blockWidth * (leftMoving + i), topMoving, blockWidth, blockWidth);
+            }
+        } else {
+            for (FallingBlock f : fallingBlocks) {
+                g2d.fillRect(f.leftX, f.topY, blockWidth, blockWidth);
+            }
         }
-
         g2d = (Graphics2D) pnlScreen.getGraphics();
         g2d.drawImage(img, 0, 0, pnlScreen);
+    }
+
+    public void drop() {
+        doesMove = false;
+        for (int i = 0; i < movingBlocks.length; i++) {
+            fallingBlocks.add(new FallingBlock(boundary + blockWidth * (leftMoving + i), topMoving));
+        }
     }
 
     /**
@@ -142,11 +193,13 @@ public class Game_GUI extends javax.swing.JFrame {
         borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
         numberOfBlocks = pnlScreen.getWidth() / blockWidth;
         boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
-        topMoving = pnlScreen.getHeight() - blockWidth * 3; //change to the upper block later
+        topMoving = pnlScreen.getHeight() - blockWidth * 3;
     }//GEN-LAST:event_onResize
 
     private void onKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyPressed
-        System.out.println(evt.getKeyCode());
+        if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
+            drop();
+        }
     }//GEN-LAST:event_onKeyPressed
 
     /**
