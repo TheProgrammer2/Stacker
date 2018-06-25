@@ -6,7 +6,6 @@
 package GUI;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -24,7 +23,7 @@ public class Game_GUI extends javax.swing.JFrame {
     int[] movingBlocks = new int[10];
 
     int leftMoving = 0;
-    long movingSpeed = 80;
+    long movingSpeed = 900;
     boolean moveRight = true;
     int topMoving;
 
@@ -41,7 +40,7 @@ public class Game_GUI extends javax.swing.JFrame {
         borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
         boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
         numberOfBlocks = pnlScreen.getWidth() / blockWidth;
-        topMoving = blockWidth * fixedBlocks.length; //change to the upper block later
+        topMoving = pnlScreen.getHeight() - blockWidth * 3; //change to the upper block later
 
         // init the base row
         for (int i = 0; i < fixedBlocks[0].length; i++) {
@@ -59,12 +58,12 @@ public class Game_GUI extends javax.swing.JFrame {
                     }
                 } else {
                     leftMoving--;
-                    if (leftMoving == 0) {
+                    if (leftMoving <= 0) {
                         moveRight = true;
                     }
                 }
             }
-        }, 0, movingSpeed);
+        }, movingSpeed, movingSpeed);
         Timer updateTimer = new Timer();
         updateTimer.schedule(new TimerTask() {
             @Override
@@ -117,6 +116,11 @@ public class Game_GUI extends javax.swing.JFrame {
                 onResize(evt);
             }
         });
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                onKeyPressed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pnlScreenLayout = new javax.swing.GroupLayout(pnlScreen);
         pnlScreen.setLayout(pnlScreenLayout);
@@ -138,7 +142,12 @@ public class Game_GUI extends javax.swing.JFrame {
         borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
         numberOfBlocks = pnlScreen.getWidth() / blockWidth;
         boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
+        topMoving = pnlScreen.getHeight() - blockWidth * 3; //change to the upper block later
     }//GEN-LAST:event_onResize
+
+    private void onKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyPressed
+        System.out.println(evt.getKeyCode());
+    }//GEN-LAST:event_onKeyPressed
 
     /**
      * @param args the command line arguments
