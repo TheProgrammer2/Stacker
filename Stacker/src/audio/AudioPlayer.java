@@ -23,7 +23,8 @@ public class AudioPlayer {
     
     public static final String PATH = System.getProperty("user.dir") + File.separator +
             "src" + File.separator +
-            "res" + File.separator;
+            "res" + File.separator +
+            "audio" + File.separator;
     
     public static HashMap<String,Thread> threads = new HashMap<>();
     
