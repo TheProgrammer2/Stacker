@@ -26,7 +26,7 @@ public class Game_GUI extends javax.swing.JFrame {
     int[] movingBlocks = new int[10];
 
     int leftMoving = 0;
-    long movingSpeed = 350;
+    long movingSpeed = 100;
     boolean moveRight = true;
     int topMoving;
     boolean doesMove = true;
@@ -35,6 +35,8 @@ public class Game_GUI extends javax.swing.JFrame {
     int boundary;
     int borderLeft;
     int numberOfBlocks;
+
+    boolean isGameOver = false;
 
     int fallingspeed = 25;
     LinkedList<FallingBlock> fallingBlocks = new LinkedList<>();
@@ -87,9 +89,13 @@ public class Game_GUI extends javax.swing.JFrame {
             @Override
             public void run() {
                 boolean hasSettled = false;
+                int settleCount = 0;
+                boolean passedSettleRow = false;
+
                 LinkedList<FallingBlock> toRemove = new LinkedList<>();
                 for (FallingBlock f : fallingBlocks) {
                     if (topMoving + blockWidth == f.topY) { // is in the row where it should settle
+                        passedSettleRow = true;
                         f.done = true; //means that this block has now passed the settle-row and is either falling until it reaches the end or getting part of fixedBlocks
                         // is in the range of the columns 0 - 9 of fixedBlocks
                         if (borderLeft <= f.leftX && f.leftX < borderLeft + fixedBlocks[0].length * blockWidth) {
@@ -102,6 +108,8 @@ public class Game_GUI extends javax.swing.JFrame {
                                 score++;
                                 toRemove.add(f);
                                 hasSettled = true;
+                                settleCount++;
+                                continue;
                             }
                         }
                     } else {
@@ -112,6 +120,12 @@ public class Game_GUI extends javax.swing.JFrame {
                     } else {
                         f.topY += 5;
                     }
+                }
+                if (passedSettleRow && settleCount == 0) {
+                    System.out.println("Game Over");
+                    isGameOver = true;
+                } else if (passedSettleRow) {
+                    movingBlocks = new int[settleCount];
                 }
                 if (hasSettled) {
                     doesMove = true;
