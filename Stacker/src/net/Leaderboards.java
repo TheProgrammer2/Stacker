@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public class Leaderboards {
     
-    public static final String SERVER_DOMAIN = "localhost";
+    public static final String SERVER_DOMAIN = "stacker.game-server.cc";
     
     // getLeaderboards() Response Codes
     // 0  - OK Response
