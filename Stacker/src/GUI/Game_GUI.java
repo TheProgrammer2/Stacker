@@ -86,10 +86,11 @@ public class Game_GUI extends javax.swing.JFrame {
         fall.schedule(new TimerTask() {
             @Override
             public void run() {
+                boolean hasSettled = false;
                 LinkedList<FallingBlock> toRemove = new LinkedList<>();
                 for (FallingBlock f : fallingBlocks) {
                     if (topMoving + blockWidth == f.topY) { // is in the row where it should settle
-                        f.done = true;
+                        f.done = true; //means that this block has now passed the settle-row and is either falling until it reaches the end or getting part of fixedBlocks
                         // is in the range of the columns 0 - 9 of fixedBlocks
                         if (borderLeft <= f.leftX && f.leftX < borderLeft + fixedBlocks[0].length * blockWidth) {
                             int zeile = (pnlScreen.getHeight() - (topMoving + 2 * blockWidth)) / blockWidth;
@@ -98,18 +99,25 @@ public class Game_GUI extends javax.swing.JFrame {
                             if (fixedBlocks[zeile - 1][spalte] == 1) {
                                 fixedBlocks[zeile][spalte] = 1;
                                 AudioPlayer.playAsync("blockplace");
+                                score++;
                                 toRemove.add(f);
+                                hasSettled = true;
                             }
                         }
                     } else {
                         f.topY += 5;
                     }
-                    if (f.topY + blockWidth >= pnlScreen.getHeight()) { // passes the bottom of the window and gets removed
+                    if (f.topY >= pnlScreen.getHeight()) { // passes the bottom of the window and gets removed
                         toRemove.add(f);
                     } else {
                         f.topY += 5;
                     }
                 }
+                if (hasSettled) {
+                    doesMove = true;
+                    topMoving -= blockWidth;
+                }
+
                 for (FallingBlock f : toRemove) {
                     fallingBlocks.remove(f);
                 }
@@ -121,6 +129,11 @@ public class Game_GUI extends javax.swing.JFrame {
     public void paint(Graphics g) {
         BufferedImage img = (BufferedImage) createImage(pnlScreen.getWidth(), pnlScreen.getWidth());
         Graphics2D g2d = (Graphics2D) img.getGraphics();
+
+        //painting falling blocks
+        for (FallingBlock f : fallingBlocks) {
+            g2d.fillRect(f.leftX, f.topY, blockWidth, blockWidth);
+        }
 
         // painting the fixed blocks
         for (int z = 0; z < fixedBlocks.length; z++) {
@@ -139,11 +152,8 @@ public class Game_GUI extends javax.swing.JFrame {
             for (int i = 0; i < movingBlocks.length; i++) {
                 g2d.fillRect(boundary + blockWidth * (leftMoving + i), topMoving, blockWidth, blockWidth);
             }
-        } else {
-            for (FallingBlock f : fallingBlocks) {
-                g2d.fillRect(f.leftX, f.topY, blockWidth, blockWidth);
-            }
         }
+
         g2d = (Graphics2D) pnlScreen.getGraphics();
         g2d.drawImage(img, 0, 0, pnlScreen);
     }
