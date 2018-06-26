@@ -9,10 +9,12 @@ import Loader.ImageLoader;
 import audio.AudioPlayer;
 import beans.FallingBlock;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -27,7 +29,7 @@ public class Game_GUI extends javax.swing.JFrame {
     int[] movingBlocks = new int[10];
 
     int leftMoving = 0;
-    long movingSpeed = 100;
+    long movingSpeed = 80;
     boolean moveRight = true;
     int topMoving;
     boolean doesMove = true;
@@ -152,9 +154,14 @@ public class Game_GUI extends javax.swing.JFrame {
         g2d.drawImage(background, 0, 0, pnlScreen);
 
         //painting falling blocks
-        for (FallingBlock f : fallingBlocks) {
-            g2d.drawImage(blueBlock, f.leftX, f.topY, pnlScreen);
-            //g2d.fillRect(f.leftX, f.topY, blockWidth, blockWidth);
+        try {
+            for (FallingBlock f : fallingBlocks) {
+                g2d.drawImage(blueBlock, f.leftX, f.topY, pnlScreen);
+                //g2d.fillRect(f.leftX, f.topY, blockWidth, blockWidth);
+            }
+        } catch (ConcurrentModificationException e) {
+            System.out.println("Modified while printing!");
+            return;
         }
 
         // painting the fixed blocks
@@ -172,6 +179,17 @@ public class Game_GUI extends javax.swing.JFrame {
                 g2d.drawImage(redBlock, boundary + blockWidth * (leftMoving + i), topMoving, pnlScreen);
                 //g2d.fillRect(boundary + blockWidth * (leftMoving + i), topMoving, blockWidth, blockWidth);
             }
+        }
+
+        //print score
+        g2d.setFont(new Font("Arial", Font.BOLD, 25));
+        g2d.setColor(Color.white);
+        g2d.drawString("Score: " + score, 20, 50);
+
+        if (isGameOver) {
+            g2d.setFont(new Font("Arial", Font.BOLD, 40));
+            g2d.setColor(Color.red);
+            g2d.drawString("Game Over!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Game Over!")) / 2, 100);
         }
 
         g2d = (Graphics2D) pnlScreen.getGraphics();
@@ -232,8 +250,10 @@ public class Game_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_onResize
 
     private void onKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
-            drop();
+        if (!isGameOver) {
+            if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
+                drop();
+            }
         }
     }//GEN-LAST:event_onKeyPressed
 
