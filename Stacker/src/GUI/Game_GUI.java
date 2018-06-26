@@ -5,6 +5,7 @@
  */
 package GUI;
 
+import Loader.ImageLoader;
 import audio.AudioPlayer;
 import beans.FallingBlock;
 import java.awt.Color;
@@ -38,9 +39,14 @@ public class Game_GUI extends javax.swing.JFrame {
 
     boolean isGameOver = false;
 
-    int fallingspeed = 25;
+    int fallingspeed = 40;
     LinkedList<FallingBlock> fallingBlocks = new LinkedList<>();
     int score = 0;
+
+    BufferedImage blueBlock = ImageLoader.loadImage("blueblock.png");
+    BufferedImage redBlock = ImageLoader.loadImage("redblock.png");
+    BufferedImage grayBlock = ImageLoader.loadImage("grayblock.png");
+    BufferedImage background = ImageLoader.loadImage("bg.png");
 
     public Game_GUI() {
         initComponents();
@@ -143,20 +149,19 @@ public class Game_GUI extends javax.swing.JFrame {
     public void paint(Graphics g) {
         BufferedImage img = (BufferedImage) createImage(pnlScreen.getWidth(), pnlScreen.getWidth());
         Graphics2D g2d = (Graphics2D) img.getGraphics();
+        g2d.drawImage(background, 0, 0, pnlScreen);
 
         //painting falling blocks
         for (FallingBlock f : fallingBlocks) {
-            g2d.fillRect(f.leftX, f.topY, blockWidth, blockWidth);
+            g2d.drawImage(blueBlock, f.leftX, f.topY, pnlScreen);
+            //g2d.fillRect(f.leftX, f.topY, blockWidth, blockWidth);
         }
 
         // painting the fixed blocks
         for (int z = 0; z < fixedBlocks.length; z++) {
             for (int s = 0; s < fixedBlocks[0].length; s++) {
                 if (fixedBlocks[z][s] == 1) {
-                    g2d.fillRect(borderLeft + s * blockWidth, pnlScreen.getHeight() - z * blockWidth - blockWidth, blockWidth, blockWidth);
-                    g2d.setColor(Color.yellow);
-                    g2d.drawRect(borderLeft + s * blockWidth, pnlScreen.getHeight() - z * blockWidth - blockWidth, blockWidth, blockWidth);
-                    g2d.setColor(Color.black);
+                    g2d.drawImage(grayBlock, borderLeft + s * blockWidth, pnlScreen.getHeight() - z * blockWidth - blockWidth, pnlScreen);
                 }
             }
         }
@@ -164,7 +169,8 @@ public class Game_GUI extends javax.swing.JFrame {
         // painting the moving blocks
         if (doesMove) {
             for (int i = 0; i < movingBlocks.length; i++) {
-                g2d.fillRect(boundary + blockWidth * (leftMoving + i), topMoving, blockWidth, blockWidth);
+                g2d.drawImage(redBlock, boundary + blockWidth * (leftMoving + i), topMoving, pnlScreen);
+                //g2d.fillRect(boundary + blockWidth * (leftMoving + i), topMoving, blockWidth, blockWidth);
             }
         }
 
