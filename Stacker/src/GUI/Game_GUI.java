@@ -9,6 +9,7 @@ import Loader.ImageLoader;
 import audio.AudioPlayer;
 import beans.FallingBlock;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
@@ -174,6 +175,12 @@ public class Game_GUI extends javax.swing.JFrame {
             }
         }
 
+        if (isGameOver) {
+            g2d.setFont(new Font("Arial", Font.BOLD, 40));
+            g2d.setColor(Color.red);
+            g2d.drawString("Game Over!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Game Over!")) / 2, 100);
+        }
+
         g2d = (Graphics2D) pnlScreen.getGraphics();
         g2d.drawImage(img, 0, 0, pnlScreen);
     }
@@ -232,8 +239,10 @@ public class Game_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_onResize
 
     private void onKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
-            drop();
+        if (!isGameOver) {
+            if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
+                drop();
+            }
         }
     }//GEN-LAST:event_onKeyPressed
 
