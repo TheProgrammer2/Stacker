@@ -34,6 +34,8 @@ public class AudioPlayer {
     private static boolean loopInterrupt = false;
     private static boolean loopRunning = false;
     
+    private static String loopingTrack = "";
+    
     private static Thread queueThread;
     private static boolean handleQueue = true;
     
@@ -73,6 +75,7 @@ public class AudioPlayer {
             loopQueue.add(filename);
             return;
         }
+        loopingTrack = filename;
         loopRunning = true;
         looping = true;
         loopReset = true;
@@ -85,6 +88,7 @@ public class AudioPlayer {
                     }
                     if(loopInterrupt) {
                         endAudio(filename);
+                        break;
                     }
                     try {
                         Thread.sleep(1);
@@ -165,8 +169,10 @@ public class AudioPlayer {
         } catch(IOException e) {
             System.out.println("Error playing sound: " + e.getMessage());
         }
-        loopReset = true;
-        loopRunning = false;
+        if(audio.getName().contains(loopingTrack)) {
+            loopReset = true;
+            loopRunning = false;
+        }
     }
     
 }
