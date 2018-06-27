@@ -33,6 +33,8 @@ public class Game_GUI extends javax.swing.JFrame {
     int boundary;
     int borderLeft;
     int numberOfBlocks;
+    
+    int musicStep = 1;
 
     boolean isGameOver = false;
 
@@ -47,7 +49,7 @@ public class Game_GUI extends javax.swing.JFrame {
 
     public Game_GUI() {
         initComponents();
-        AudioPlayer.playLoopAsync("bgm6");
+        AudioPlayer.playLoopAsync("bgm1");
         this.setExtendedState(MAXIMIZED_BOTH);
         borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
         boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
@@ -124,6 +126,12 @@ public class Game_GUI extends javax.swing.JFrame {
                         f.topY += 5;
                     }
                 }
+
+                if(score >= 40*musicStep && musicStep < 6) {
+                    musicStep++;
+                    AudioPlayer.playLoopAsync("bgm" + musicStep);
+                }
+                    
                 if (passedSettleRow && settleCount == 0) {
                     isGameOver = true;
                     AudioPlayer.hardLoopEnd();
