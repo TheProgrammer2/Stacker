@@ -23,29 +23,29 @@ import net.Leaderboards;
  */
 public class Game_GUI extends javax.swing.JFrame {
 
-    int[][] fixedBlocks = new int[10][10];
-    int[] movingBlocks = new int[10];
+    int[][] fixedBlocks;
+    int[] movingBlocks;
 
-    int leftMoving = 0;
-    long movingSpeed = 90;
-    boolean moveRight = true;
+    int leftMoving;
+    long movingSpeed;
+    boolean moveRight;
     int topMoving;
-    boolean doesMove = true;
+    boolean doesMove;
 
     int blockWidth = 50;
     int boundary;
     int borderLeft;
     int numberOfBlocks;
 
-    int musicStep = 1;
+    int musicStep;
 
-    int score = 0;
-    boolean isGameOver = false;
+    int score;
+    boolean isGameOver;
     long gameOverStart;
-    LeaderboardResponse res = null;
+    LeaderboardResponse res;
 
     int fallingspeed = 40;
-    LinkedList<FallingBlock> fallingBlocks = new LinkedList<>();
+    LinkedList<FallingBlock> fallingBlocks;
 
     BufferedImage blueBlock = ImageLoader.loadImage("blueblock.png");
     BufferedImage redBlock = ImageLoader.loadImage("redblock.png");
@@ -73,17 +73,13 @@ public class Game_GUI extends javax.swing.JFrame {
 
     public Game_GUI() {
         initComponents();
-        AudioPlayer.playLoopAsync("bgm1");
+        AudioPlayer.playLoopAsync("bgm1"); //has to be moved to reset
+        reset();
+
         this.setExtendedState(MAXIMIZED_BOTH);
         borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
         boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
         numberOfBlocks = pnlScreen.getWidth() / blockWidth;
-        topMoving = pnlScreen.getHeight() - blockWidth * 3;
-
-        // init the base row
-        for (int i = 0; i < fixedBlocks[0].length; i++) {
-            fixedBlocks[0][i] = 1;
-        }
 
         Timer updateTimer = new Timer();
         updateTimer.schedule(new TimerTask() {
@@ -239,16 +235,16 @@ public class Game_GUI extends javax.swing.JFrame {
             g2d.setColor(Color.red);
             g2d.drawString("Game Over!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Game Over!")) / 2, 100);
             if (System.currentTimeMillis() >= gameOverStart + 1500) {
-                g2d.setColor(new Color(0,0,0,150));
+                g2d.setColor(new Color(0, 0, 0, 150));
                 g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
-                if(res == null)
+                if (res == null) {
                     res = Leaderboards.getLeaderboards();
-                if(res.getResponseCode() != 0) {
+                }
+                if (res.getResponseCode() != 0) {
                     g2d.setFont(new Font("Arial", Font.BOLD, 40));
                     g2d.setColor(Color.red);
-                    g2d.drawString("Could not connect to Leaderboards Server!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Could not connect to Leaderboards Server!")) / 2, this.getHeight()/2 - 20);
-                }
-                else {
+                    g2d.drawString("Could not connect to Leaderboards Server!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Could not connect to Leaderboards Server!")) / 2, this.getHeight() / 2 - 20);
+                } else {
                     int y = 300;
                     g2d.setFont(new Font("Arial", Font.BOLD, 40));
                     g2d.setColor(Color.white);
