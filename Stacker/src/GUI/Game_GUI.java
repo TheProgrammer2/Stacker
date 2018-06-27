@@ -45,7 +45,7 @@ public class Game_GUI extends javax.swing.JFrame {
     boolean isGameOver;
     long gameOverStart;
     LeaderboardResponse res;
-    boolean askedForUpload;
+    boolean uploaded;
     boolean canDrop;
 
     int fallingspeed = 40;
@@ -74,7 +74,7 @@ public class Game_GUI extends javax.swing.JFrame {
         gameOverStart = 0;
         fallingBlocks = new LinkedList<>();
         res = null;
-        askedForUpload = false;
+        uploaded = false;
         canDrop = true;
         for (int i = 0; i < fixedBlocks[0].length; i++) {
             fixedBlocks[0][i] = 1;
@@ -248,11 +248,18 @@ public class Game_GUI extends javax.swing.JFrame {
             if (System.currentTimeMillis() >= gameOverStart + 1500) {
                 g2d.setColor(new Color(0, 0, 0, 150));
                 g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
-                
                 if (res == null) {
                     res = Leaderboards.getLeaderboards();
                 }
+                g2d.setColor(Color.white);
+                g2d.drawImage(rbutton, 10, this.getBounds().height - 120, pnlScreen);
+                g2d.drawString("Restart", 90, this.getBounds().height - 75);
+                if(!uploaded && res.getResponseCode() == 0) {
+                    g2d.drawImage(spacebutton, 10, this.getBounds().height - 120 - 70, pnlScreen);
+                    g2d.drawString("Upload Score", 390, this.getBounds().height - 75 - 70);
+                }
                 if (res.getResponseCode() != 0) {
+                    uploaded = true;
                     g2d.setFont(new Font("Arial", Font.BOLD, 40));
                     g2d.setColor(Color.red);
                     g2d.drawString("Could not connect to Leaderboards Server!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Could not connect to Leaderboards Server!")) / 2, this.getHeight() / 2 - 20);
@@ -263,29 +270,6 @@ public class Game_GUI extends javax.swing.JFrame {
                     for (LeaderboardEntry entry : res.getEntries()) {
                         g2d.drawString(entry.toString(), (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth(entry.toString())) / 2, y);
                         y += 50;
-                    }
-                    if (!askedForUpload) {
-                        askedForUpload = true;
-                        if (JOptionPane.showConfirmDialog(this, "Do you want to upload your score to the online leaderboards?", "Leaderboards", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                            String name = JOptionPane.showInputDialog("Please enter your name: (leave blank to abort upload)");
-                            if (name.equals("")) {
-                                return;
-                            }
-                            while (name.contains(";") || name.length() > 16) {
-                                name = JOptionPane.showInputDialog("Please enter your name: (leave blank to abort upload)\nNames cannot contain semicolons (;) and can only be up to 16 characters long.");
-                                if (name.equals("")) {
-                                    return;
-                                }
-                            }
-                            int result = Leaderboards.addEntry(new LeaderboardEntry(name, score));
-                            System.out.println(result);
-                            if (result != 0) {
-                                JOptionPane.showMessageDialog(this, "Sorry! Your score could not be uploaded. Please check your connection or message the developers.");
-                            } else {
-                                JOptionPane.showMessageDialog(this, "Your score has successfully been uploaded!");
-                                res = Leaderboards.getLeaderboards();
-                            }
-                        }
                     }
                 }
             }
@@ -299,6 +283,29 @@ public class Game_GUI extends javax.swing.JFrame {
         doesMove = false;
         for (int i = 0; i < movingBlocks.length; i++) {
             fallingBlocks.add(new FallingBlock(boundary + blockWidth * (leftMoving + i), topMoving));
+        }
+    }
+    
+    public void upload() {
+        
+        if (JOptionPane.showConfirmDialog(this, "Do you want to upload your score to the online leaderboards?", "Leaderboards", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            String name = JOptionPane.showInputDialog("Please enter your name: ");
+            if(name == null)
+                return;
+            while (name.contains(";") || name.length() > 16) {
+                name = JOptionPane.showInputDialog("Please enter your name: (leave blank to abort upload)\nNames cannot contain semicolons (;) and can only be up to 16 characters long.");
+                if(name == null)
+                    return;
+            }
+            int result = Leaderboards.addEntry(new LeaderboardEntry(name, score));
+            System.out.println(result);
+            if (result != 0) {
+                JOptionPane.showMessageDialog(this, "Sorry! Your score could not be uploaded. Please check your connection or message the developers.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Your score has successfully been uploaded!");
+                res = Leaderboards.getLeaderboards();
+            }
+            uploaded = true;
         }
     }
 
@@ -359,6 +366,10 @@ public class Game_GUI extends javax.swing.JFrame {
         } else {
             if (evt.getKeyCode() == KeyEvent.VK_R) {
                 reset();
+            }
+            else if(evt.getKeyCode() == KeyEvent.VK_SPACE) {
+                if(!uploaded)
+                    upload();
             }
         }
     }//GEN-LAST:event_onKeyPressed

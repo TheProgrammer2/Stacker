@@ -48,8 +48,8 @@ public class Leaderboards {
             params.put("action", "get_leaderboards");
             
             con.setDoOutput(true);
-            con.setConnectTimeout(5000);
-            con.setReadTimeout(5000);
+            con.setConnectTimeout(2000);
+            con.setReadTimeout(2000);
             DataOutputStream out = new DataOutputStream(con.getOutputStream());
             out.writeBytes(ParameterStringBuilder.getParamsString(params));
             out.flush();
@@ -107,8 +107,8 @@ public class Leaderboards {
             params.put("score", entry.getScore()+"");
             
             con.setDoOutput(true);
-            con.setConnectTimeout(5000);
-            con.setReadTimeout(5000);
+            con.setConnectTimeout(2000);
+            con.setReadTimeout(2000);
             DataOutputStream out = new DataOutputStream(con.getOutputStream());
             out.writeBytes(ParameterStringBuilder.getParamsString(params));
             out.flush();
@@ -161,8 +161,8 @@ public class Leaderboards {
             params.put("action", "clear_leaderboard");
             
             con.setDoOutput(true);
-            con.setConnectTimeout(5000);
-            con.setReadTimeout(5000);
+            con.setConnectTimeout(2000);
+            con.setReadTimeout(2000);
             DataOutputStream out = new DataOutputStream(con.getOutputStream());
             out.writeBytes(ParameterStringBuilder.getParamsString(params));
             out.flush();
