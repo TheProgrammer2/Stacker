@@ -174,7 +174,6 @@ public class Game_GUI extends javax.swing.JFrame {
         try {
             for (FallingBlock f : fallingBlocks) {
                 g2d.drawImage(blueBlock, f.leftX, f.topY, pnlScreen);
-                //g2d.fillRect(f.leftX, f.topY, blockWidth, blockWidth);
             }
         } catch (ConcurrentModificationException e) {
             System.out.println("Modified while printing!");
@@ -194,7 +193,6 @@ public class Game_GUI extends javax.swing.JFrame {
         if (doesMove) {
             for (int i = 0; i < movingBlocks.length; i++) {
                 g2d.drawImage(redBlock, boundary + blockWidth * (leftMoving + i), topMoving, pnlScreen);
-                //g2d.fillRect(boundary + blockWidth * (leftMoving + i), topMoving, blockWidth, blockWidth);
             }
         }
 
