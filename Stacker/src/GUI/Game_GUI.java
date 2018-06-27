@@ -262,7 +262,7 @@ public class Game_GUI extends javax.swing.JFrame {
                             if(name.equals(""))
                                 return;
                             while(name.contains(";") || name.length() > 16) {
-                                name = JOptionPane.showInputDialog("Please enter your name:\nNames cannot contain semicolons (;) and can only be up to 16 characters long.");
+                                name = JOptionPane.showInputDialog("Please enter your name: (leave blank to abort upload)\nNames cannot contain semicolons (;) and can only be up to 16 characters long.");
                                 if(name.equals(""))
                                     return;
                             }
