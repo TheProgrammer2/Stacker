@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package GUI;
 
 import Loader.ImageLoader;
@@ -29,7 +24,7 @@ public class Game_GUI extends javax.swing.JFrame {
     int[] movingBlocks = new int[10];
 
     int leftMoving = 0;
-    long movingSpeed = 80;
+    long movingSpeed = 90;
     boolean moveRight = true;
     int topMoving;
     boolean doesMove = true;
@@ -130,8 +125,9 @@ public class Game_GUI extends javax.swing.JFrame {
                     }
                 }
                 if (passedSettleRow && settleCount == 0) {
-                    System.out.println("Game Over");
                     isGameOver = true;
+                    AudioPlayer.hardLoopEnd();
+                    AudioPlayer.playAsync("gameover");
                 } else if (passedSettleRow) {
                     movingBlocks = new int[settleCount];
                 }
@@ -143,8 +139,29 @@ public class Game_GUI extends javax.swing.JFrame {
                 for (FallingBlock f : toRemove) {
                     fallingBlocks.remove(f);
                 }
+
+                if (hasBlockInFirstRow()) {
+                    topMoving += blockWidth;
+                    for (int z = 0; z < fixedBlocks.length - 1; z++) {
+                        for (int s = 0; s < fixedBlocks[0].length; s++) {
+                            fixedBlocks[z][s] = fixedBlocks[z + 1][s];
+                        }
+                    }
+                    for (int s = 0; s < fixedBlocks[0].length; s++) {
+                        fixedBlocks[fixedBlocks.length - 1][s] = 0;
+                    }
+                }
             }
         }, 0, fallingspeed);
+    }
+
+    public boolean hasBlockInFirstRow() {
+        for (int i = 0; i < fixedBlocks[fixedBlocks.length - 1].length; i++) {
+            if (fixedBlocks[fixedBlocks.length - 1][i] == 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
