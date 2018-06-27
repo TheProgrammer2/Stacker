@@ -248,7 +248,7 @@ public class Game_GUI extends javax.swing.JFrame {
                     g2d.setColor(Color.red);
                     g2d.drawString("Could not connect to Leaderboards Server!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Could not connect to Leaderboards Server!")) / 2, this.getHeight() / 2 - 20);
                 } else {
-                    int y = 300;
+                    int y = this.getHeight() / 2 - 250;
                     g2d.setFont(new Font("Arial", Font.BOLD, 40));
                     g2d.setColor(Color.white);
                     for (LeaderboardEntry entry : res.getEntries()) {
