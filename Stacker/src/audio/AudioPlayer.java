@@ -59,6 +59,16 @@ public class AudioPlayer {
         queueThread.start();
     }
     
+    public static void reset() {
+        looping = false;
+        loopReset = false;
+        loopRunning = false;
+        loopInterrupt = false;
+        loopingTrack = "";
+        loopQueue = new LinkedList<>();
+        threads = new HashMap<>();
+    }
+    
     public static void softLoopEnd() {
         looping = false;
         loopReset = false;

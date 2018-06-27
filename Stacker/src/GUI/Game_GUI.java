@@ -39,6 +39,7 @@ public class Game_GUI extends javax.swing.JFrame {
     int numberOfBlocks;
 
     int musicStep;
+    int scoreInterval = 50;
 
     int score;
     boolean isGameOver;
@@ -54,8 +55,12 @@ public class Game_GUI extends javax.swing.JFrame {
     BufferedImage redBlock = ImageLoader.loadImage("redblock.png");
     BufferedImage grayBlock = ImageLoader.loadImage("grayblock.png");
     BufferedImage background = ImageLoader.loadImage("bg.png");
+    
+    BufferedImage rbutton = ImageLoader.loadImage("rbutton.png");
+    BufferedImage spacebutton = ImageLoader.loadImage("spacebutton.png");
 
     public void reset() {
+        AudioPlayer.reset();
         fixedBlocks = new int[10][10];
         movingBlocks = new int[10];
         leftMoving = 0;
@@ -152,7 +157,7 @@ public class Game_GUI extends javax.swing.JFrame {
                     }
                 }
 
-                if (score >= 40 * musicStep && musicStep < 6) {
+                if (score >= scoreInterval * musicStep && musicStep < 6) {
                     musicStep++;
                     AudioPlayer.playLoopAsync("bgm" + musicStep);
                 }
@@ -243,6 +248,7 @@ public class Game_GUI extends javax.swing.JFrame {
             if (System.currentTimeMillis() >= gameOverStart + 1500) {
                 g2d.setColor(new Color(0, 0, 0, 150));
                 g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
+                
                 if (res == null) {
                     res = Leaderboards.getLeaderboards();
                 }
