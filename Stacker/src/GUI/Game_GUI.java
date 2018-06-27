@@ -13,6 +13,7 @@ import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -33,7 +34,7 @@ public class Game_GUI extends javax.swing.JFrame {
     int boundary;
     int borderLeft;
     int numberOfBlocks;
-    
+
     int musicStep = 1;
 
     boolean isGameOver = false;
@@ -41,6 +42,7 @@ public class Game_GUI extends javax.swing.JFrame {
     int fallingspeed = 40;
     LinkedList<FallingBlock> fallingBlocks = new LinkedList<>();
     int score = 0;
+    long gameOverStart;
 
     BufferedImage blueBlock = ImageLoader.loadImage("blueblock.png");
     BufferedImage redBlock = ImageLoader.loadImage("redblock.png");
@@ -127,13 +129,14 @@ public class Game_GUI extends javax.swing.JFrame {
                     }
                 }
 
-                if(score >= 40*musicStep && musicStep < 6) {
+                if (score >= 40 * musicStep && musicStep < 6) {
                     musicStep++;
                     AudioPlayer.playLoopAsync("bgm" + musicStep);
                 }
-                    
+
                 if (passedSettleRow && settleCount == 0) {
                     isGameOver = true;
+                    gameOverStart = System.currentTimeMillis();
                     AudioPlayer.hardLoopEnd();
                     AudioPlayer.playAsync("gameover");
                 } else if (passedSettleRow) {
@@ -213,6 +216,9 @@ public class Game_GUI extends javax.swing.JFrame {
             g2d.setFont(new Font("Arial", Font.BOLD, 40));
             g2d.setColor(Color.red);
             g2d.drawString("Game Over!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Game Over!")) / 2, 100);
+            if (System.currentTimeMillis() >= gameOverStart + 1500) {
+                //print leaderboard here
+            }
         }
 
         g2d = (Graphics2D) pnlScreen.getGraphics();
