@@ -258,9 +258,13 @@ public class Game_GUI extends javax.swing.JFrame {
                     if(!askedForUpload) {
                         askedForUpload = true;
                         if(JOptionPane.showConfirmDialog(this, "Do you want to upload your score to the online leaderboards?", "Leaderboards", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                            String name = JOptionPane.showInputDialog("Please enter your name:");
-                            while(name.equals("") || name.contains(";") || name.length() > 16) {
+                            String name = JOptionPane.showInputDialog("Please enter your name: (leave blank to abort upload)");
+                            if(name.equals(""))
+                                return;
+                            while(name.contains(";") || name.length() > 16) {
                                 name = JOptionPane.showInputDialog("Please enter your name:\nNames cannot contain semicolons (;) and can only be up to 16 characters long.");
+                                if(name.equals(""))
+                                    return;
                             }
                             int result = Leaderboards.addEntry(new LeaderboardEntry(name, score));
                             System.out.println(result);
