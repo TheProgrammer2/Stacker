@@ -3,6 +3,8 @@ package GUI;
 import Loader.ImageLoader;
 import audio.AudioPlayer;
 import beans.FallingBlock;
+import beans.LeaderboardEntry;
+import beans.LeaderboardResponse;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -13,6 +15,7 @@ import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
+import net.Leaderboards;
 
 /**
  *
@@ -39,6 +42,7 @@ public class Game_GUI extends javax.swing.JFrame {
     int score = 0;
     boolean isGameOver = false;
     long gameOverStart;
+    LeaderboardResponse res = null;
 
     int fallingspeed = 40;
     LinkedList<FallingBlock> fallingBlocks = new LinkedList<>();
@@ -61,7 +65,7 @@ public class Game_GUI extends javax.swing.JFrame {
         isGameOver = false;
         gameOverStart = 0;
         fallingBlocks = new LinkedList<>();
-
+        res = null;
         for (int i = 0; i < fixedBlocks[0].length; i++) {
             fixedBlocks[0][i] = 1;
         }
@@ -235,7 +239,24 @@ public class Game_GUI extends javax.swing.JFrame {
             g2d.setColor(Color.red);
             g2d.drawString("Game Over!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Game Over!")) / 2, 100);
             if (System.currentTimeMillis() >= gameOverStart + 1500) {
-                //print leaderboard here
+                g2d.setColor(new Color(0,0,0,150));
+                g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
+                if(res == null)
+                    res = Leaderboards.getLeaderboards();
+                if(res.getResponseCode() != 0) {
+                    g2d.setFont(new Font("Arial", Font.BOLD, 40));
+                    g2d.setColor(Color.red);
+                    g2d.drawString("Could not connect to Leaderboards Server!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Could not connect to Leaderboards Server!")) / 2, this.getHeight()/2 - 20);
+                }
+                else {
+                    int y = 300;
+                    g2d.setFont(new Font("Arial", Font.BOLD, 40));
+                    g2d.setColor(Color.white);
+                    for (LeaderboardEntry entry : res.getEntries()) {
+                        g2d.drawString(entry.toString(), (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth(entry.toString())) / 2, y);
+                        y += 50;
+                    }
+                }
             }
         }
 
