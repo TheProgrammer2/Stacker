@@ -171,7 +171,8 @@ public class AudioPlayer {
         }
         if(audio.getName().contains(loopingTrack)) {
             loopReset = true;
-            loopRunning = false;
+            if(loopQueue.size() > 0)
+                loopRunning = false;
         }
     }
     
