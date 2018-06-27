@@ -27,8 +27,7 @@ public class AudioPlayer {
             "src" + File.separator +
             "res" + File.separator;
     
-    private static HashMap<String,Thread> threads = new HashMap<>();
-    private static HashMap<String,Clip> clips = new HashMap<>();
+    public static HashMap<String,Thread> threads = new HashMap<>();
     private static List<String> loopQueue = new LinkedList<>();
     private static boolean looping = false;
     private static boolean loopReset = false;
@@ -64,6 +63,7 @@ public class AudioPlayer {
     }
     
     public static void hardLoopEnd() {
+        looping = false;
         loopInterrupt = true;
         loopReset = false;
     }
@@ -84,9 +84,7 @@ public class AudioPlayer {
                         loopReset = false;
                     }
                     if(loopInterrupt) {
-                        System.out.println("ended");
-                        looping = false;
-                        break;
+                        endAudio(filename);
                     }
                     try {
                         Thread.sleep(1);
@@ -102,9 +100,7 @@ public class AudioPlayer {
             try {
                 for(String audio : threads.keySet()) {
                     threads.get(audio).interrupt();
-                    clips.get(audio).stop();
                     threads.remove(audio);
-                    clips.remove(audio);
                 }
             } catch(ConcurrentModificationException e) { }
         }
@@ -114,9 +110,7 @@ public class AudioPlayer {
     public static void endAudio(String filename) {
         if(threads.containsKey(filename)) {
             threads.get(filename).interrupt();
-            clips.get(filename).stop();
             threads.remove(filename);
-            clips.remove(filename);
         }
     }
     
@@ -158,7 +152,6 @@ public class AudioPlayer {
         try {
             Clip clip = AudioSystem.getClip();
             clip.addLineListener(listener);
-            clips.put(audio.getName().split("\\.")[0], clip);
             clip.open(stream);
             clip.start();
             while(!listener.isDone()) {
