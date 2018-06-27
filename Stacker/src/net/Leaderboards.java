@@ -133,7 +133,8 @@ public class Leaderboards {
         } catch(IOException e) {
             return 2;
         }
-        if(!content.equals("{\"error_code\":0,\"msg\":\"Success\"}"))
+        System.out.println(content);
+        if(!content.contains("Success"))
             return 3;
         return 0;
     }
@@ -186,7 +187,7 @@ public class Leaderboards {
         } catch(IOException e) {
             return 2;
         }
-        if(!content.equals("{\"error_code\":0,\"msg\":\"Success\"}"))
+        if(!content.contains("Success"))
             return 3;
         return 0;
     }

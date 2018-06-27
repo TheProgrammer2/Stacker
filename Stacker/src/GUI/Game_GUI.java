@@ -15,6 +15,7 @@ import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.JOptionPane;
 import net.Leaderboards;
 
 /**
@@ -43,6 +44,7 @@ public class Game_GUI extends javax.swing.JFrame {
     boolean isGameOver;
     long gameOverStart;
     LeaderboardResponse res;
+    boolean askedForUpload;
 
     int fallingspeed = 40;
     LinkedList<FallingBlock> fallingBlocks;
@@ -66,14 +68,15 @@ public class Game_GUI extends javax.swing.JFrame {
         gameOverStart = 0;
         fallingBlocks = new LinkedList<>();
         res = null;
+        askedForUpload = false;
         for (int i = 0; i < fixedBlocks[0].length; i++) {
             fixedBlocks[0][i] = 1;
         }
+        AudioPlayer.playLoopAsync("bgm1");
     }
 
     public Game_GUI() {
         initComponents();
-        AudioPlayer.playLoopAsync("bgm1"); //has to be moved to reset
         reset();
 
         this.setExtendedState(MAXIMIZED_BOTH);
@@ -251,6 +254,23 @@ public class Game_GUI extends javax.swing.JFrame {
                     for (LeaderboardEntry entry : res.getEntries()) {
                         g2d.drawString(entry.toString(), (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth(entry.toString())) / 2, y);
                         y += 50;
+                    }
+                    if(!askedForUpload) {
+                        askedForUpload = true;
+                        if(JOptionPane.showConfirmDialog(this, "Do you want to upload your score to the online leaderboards?", "Leaderboards", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                            String name = JOptionPane.showInputDialog("Please enter your name:");
+                            while(name.equals("") || name.contains(";") || name.length() > 16) {
+                                name = JOptionPane.showInputDialog("Please enter your name:\nNames cannot contain semicolons (;) and can only be up to 16 characters long.");
+                            }
+                            int result = Leaderboards.addEntry(new LeaderboardEntry(name, score));
+                            System.out.println(result);
+                            if(result != 0)
+                                JOptionPane.showMessageDialog(this, "Sorry! Your score could not be uploaded. Please check your connection or message the developers.");
+                            else {
+                                JOptionPane.showMessageDialog(this, "Your score has successfully been uploaded!");
+                                res = Leaderboards.getLeaderboards();
+                            }
+                        }
                     }
                 }
             }
