@@ -45,6 +45,7 @@ public class Game_GUI extends javax.swing.JFrame {
     long gameOverStart;
     LeaderboardResponse res;
     boolean askedForUpload;
+    boolean canDrop;
 
     int fallingspeed = 40;
     LinkedList<FallingBlock> fallingBlocks;
@@ -69,6 +70,7 @@ public class Game_GUI extends javax.swing.JFrame {
         fallingBlocks = new LinkedList<>();
         res = null;
         askedForUpload = false;
+        canDrop = true;
         for (int i = 0; i < fixedBlocks[0].length; i++) {
             fixedBlocks[0][i] = 1;
         }
@@ -162,6 +164,7 @@ public class Game_GUI extends javax.swing.JFrame {
                     AudioPlayer.playAsync("gameover");
                 } else if (passedSettleRow) {
                     movingBlocks = new int[settleCount];
+                    canDrop = true;
                 }
                 if (hasSettled) {
                     doesMove = true;
@@ -255,22 +258,24 @@ public class Game_GUI extends javax.swing.JFrame {
                         g2d.drawString(entry.toString(), (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth(entry.toString())) / 2, y);
                         y += 50;
                     }
-                    if(!askedForUpload) {
+                    if (!askedForUpload) {
                         askedForUpload = true;
-                        if(JOptionPane.showConfirmDialog(this, "Do you want to upload your score to the online leaderboards?", "Leaderboards", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                        if (JOptionPane.showConfirmDialog(this, "Do you want to upload your score to the online leaderboards?", "Leaderboards", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                             String name = JOptionPane.showInputDialog("Please enter your name: (leave blank to abort upload)");
-                            if(name.equals(""))
+                            if (name.equals("")) {
                                 return;
-                            while(name.contains(";") || name.length() > 16) {
+                            }
+                            while (name.contains(";") || name.length() > 16) {
                                 name = JOptionPane.showInputDialog("Please enter your name: (leave blank to abort upload)\nNames cannot contain semicolons (;) and can only be up to 16 characters long.");
-                                if(name.equals(""))
+                                if (name.equals("")) {
                                     return;
+                                }
                             }
                             int result = Leaderboards.addEntry(new LeaderboardEntry(name, score));
                             System.out.println(result);
-                            if(result != 0)
+                            if (result != 0) {
                                 JOptionPane.showMessageDialog(this, "Sorry! Your score could not be uploaded. Please check your connection or message the developers.");
-                            else {
+                            } else {
                                 JOptionPane.showMessageDialog(this, "Your score has successfully been uploaded!");
                                 res = Leaderboards.getLeaderboards();
                             }
@@ -339,8 +344,11 @@ public class Game_GUI extends javax.swing.JFrame {
 
     private void onKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyPressed
         if (!isGameOver) {
-            if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
-                drop();
+            if (canDrop) {
+                canDrop = false;
+                if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
+                    drop();
+                }
             }
         } else {
             if (evt.getKeyCode() == KeyEvent.VK_R) {
