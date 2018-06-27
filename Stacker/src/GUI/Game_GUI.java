@@ -47,6 +47,8 @@ public class Game_GUI extends javax.swing.JFrame {
     LeaderboardResponse res;
     boolean uploaded;
     boolean canDrop;
+    
+    Timer moveTimer;
 
     int fallingspeed = 40;
     LinkedList<FallingBlock> fallingBlocks;
@@ -99,7 +101,7 @@ public class Game_GUI extends javax.swing.JFrame {
             }
         }, 0, 5);
 
-        Timer moveTimer = new Timer();
+        moveTimer = new Timer();
         moveTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -168,6 +170,12 @@ public class Game_GUI extends javax.swing.JFrame {
                     AudioPlayer.hardLoopEnd();
                     AudioPlayer.playAsync("gameover");
                 } else if (passedSettleRow) {
+                    if(settleCount != movingBlocks.length) {
+                        increaseSpeed(-5);
+                    }
+                    else {
+                        increaseSpeed(3);
+                    }
                     movingBlocks = new int[settleCount];
                     canDrop = true;
                 }
@@ -175,7 +183,7 @@ public class Game_GUI extends javax.swing.JFrame {
                     doesMove = true;
                     topMoving -= blockWidth;
                 }
-
+                
                 for (FallingBlock f : toRemove) {
                     fallingBlocks.remove(f);
                 }
@@ -258,6 +266,9 @@ public class Game_GUI extends javax.swing.JFrame {
                     g2d.drawImage(spacebutton, 10, this.getBounds().height - 120 - 70, pnlScreen);
                     g2d.drawString("Upload Score", 390, this.getBounds().height - 75 - 70);
                 }
+                g2d.setFont(new Font("Arial", Font.BOLD, 16));
+                g2d.drawString("You can see a leaderboard of the Top 10 players at:", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("You can see a leaderboard of the Top 10 players at:")) / 2, this.getHeight() - 80);
+                g2d.drawString("http://stacker.game-server.cc/stacker", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("http://stacker.game-server.cc/stacker")) / 2, this.getHeight() - 60);
                 if (res.getResponseCode() != 0) {
                     uploaded = true;
                     g2d.setFont(new Font("Arial", Font.BOLD, 40));
@@ -307,6 +318,32 @@ public class Game_GUI extends javax.swing.JFrame {
             }
             uploaded = true;
         }
+    }
+    
+    public void increaseSpeed(int value) {
+        movingSpeed -= value;
+        if(movingSpeed < 5)
+            movingSpeed = 5;
+        moveTimer.cancel();
+        moveTimer = new Timer();
+        moveTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (doesMove) {
+                    if (moveRight) {
+                        leftMoving++;
+                        if (leftMoving + movingBlocks.length >= numberOfBlocks) {
+                            moveRight = false;
+                        }
+                    } else {
+                        leftMoving--;
+                        if (leftMoving <= 0) {
+                            moveRight = true;
+                        }
+                    }
+                }
+            }
+        }, movingSpeed, movingSpeed);
     }
 
     /**
