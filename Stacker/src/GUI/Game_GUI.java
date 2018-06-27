@@ -13,7 +13,6 @@ import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -37,17 +36,36 @@ public class Game_GUI extends javax.swing.JFrame {
 
     int musicStep = 1;
 
+    int score = 0;
     boolean isGameOver = false;
+    long gameOverStart;
 
     int fallingspeed = 40;
     LinkedList<FallingBlock> fallingBlocks = new LinkedList<>();
-    int score = 0;
-    long gameOverStart;
 
     BufferedImage blueBlock = ImageLoader.loadImage("blueblock.png");
     BufferedImage redBlock = ImageLoader.loadImage("redblock.png");
     BufferedImage grayBlock = ImageLoader.loadImage("grayblock.png");
     BufferedImage background = ImageLoader.loadImage("bg.png");
+
+    public void reset() {
+        fixedBlocks = new int[10][10];
+        movingBlocks = new int[10];
+        leftMoving = 0;
+        movingSpeed = 90;
+        moveRight = true;
+        topMoving = pnlScreen.getHeight() - blockWidth * 3;
+        doesMove = true;
+        musicStep = 1;
+        score = 0;
+        isGameOver = false;
+        gameOverStart = 0;
+        fallingBlocks = new LinkedList<>();
+
+        for (int i = 0; i < fixedBlocks[0].length; i++) {
+            fixedBlocks[0][i] = 1;
+        }
+    }
 
     public Game_GUI() {
         initComponents();
@@ -56,7 +74,7 @@ public class Game_GUI extends javax.swing.JFrame {
         borderLeft = (pnlScreen.getWidth() - fixedBlocks[0].length * blockWidth) / 2;
         boundary = (pnlScreen.getWidth() - (pnlScreen.getWidth() / blockWidth) * blockWidth) / 2;
         numberOfBlocks = pnlScreen.getWidth() / blockWidth;
-        topMoving = pnlScreen.getHeight() - blockWidth * 3; //change to the upper block later
+        topMoving = pnlScreen.getHeight() - blockWidth * 3;
 
         // init the base row
         for (int i = 0; i < fixedBlocks[0].length; i++) {
@@ -282,6 +300,10 @@ public class Game_GUI extends javax.swing.JFrame {
         if (!isGameOver) {
             if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
                 drop();
+            }
+        } else {
+            if (evt.getKeyCode() == KeyEvent.VK_R) {
+                reset();
             }
         }
     }//GEN-LAST:event_onKeyPressed
