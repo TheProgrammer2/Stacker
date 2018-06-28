@@ -68,6 +68,7 @@ public class Game_GUI extends javax.swing.JFrame {
         movingBlocks = new int[10];
         leftMoving = 0;
         movingSpeed = 90;
+        updateMoveTimer();
         moveRight = true;
         topMoving = pnlScreen.getHeight() - blockWidth * 3;
         doesMove = true;
@@ -103,25 +104,7 @@ public class Game_GUI extends javax.swing.JFrame {
             }
         }, 0, 5);
 
-        moveTimer = new Timer();
-        moveTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (doesMove) {
-                    if (moveRight) {
-                        leftMoving++;
-                        if (leftMoving + movingBlocks.length >= numberOfBlocks) {
-                            moveRight = false;
-                        }
-                    } else {
-                        leftMoving--;
-                        if (leftMoving <= 0) {
-                            moveRight = true;
-                        }
-                    }
-                }
-            }
-        }, movingSpeed, movingSpeed);
+        updateMoveTimer();
 
         Timer fall = new Timer();
         fall.schedule(new TimerTask() {
@@ -309,7 +292,7 @@ public class Game_GUI extends javax.swing.JFrame {
             if (name == null) {
                 return;
             }
-            while (name.contains(";") || name.length() > 16) {
+            while (name.equals("") || name.contains(";") || name.length() > 16) {
                 name = JOptionPane.showInputDialog("Please enter your name: (leave blank to abort upload)\nNames cannot contain semicolons (;) and can only be up to 16 characters long.");
                 if (name == null) {
                     return;
@@ -332,8 +315,14 @@ public class Game_GUI extends javax.swing.JFrame {
         if (movingSpeed < 5) {
             movingSpeed = 5;
         }
-        moveTimer.cancel();
+        updateMoveTimer();
+    }
+    
+    public void updateMoveTimer() {
+        if(moveTimer != null)
+            moveTimer.cancel();
         moveTimer = new Timer();
+        System.out.println("Timer started: " + movingSpeed + "ms delay");
         moveTimer.schedule(new TimerTask() {
             @Override
             public void run() {
