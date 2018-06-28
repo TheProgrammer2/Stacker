@@ -47,6 +47,9 @@ public class Game_GUI extends javax.swing.JFrame {
     LeaderboardResponse res;
     boolean uploaded;
     boolean canDrop;
+    
+    boolean enteringName;
+    String name;
 
     Timer moveTimer;
     boolean isMusic;
@@ -81,6 +84,8 @@ public class Game_GUI extends javax.swing.JFrame {
         uploaded = false;
         canDrop = true;
         isMusic = false;
+        enteringName = false;
+        name = "";
         for (int i = 0; i < fixedBlocks[0].length; i++) {
             fixedBlocks[0][i] = 1;
         }
@@ -169,6 +174,7 @@ public class Game_GUI extends javax.swing.JFrame {
                 }
                 if (hasSettled) {
                     doesMove = true;
+                    move();
                     topMoving -= blockWidth;
                 }
 
@@ -247,29 +253,41 @@ public class Game_GUI extends javax.swing.JFrame {
                 if (res == null) {
                     res = Leaderboards.getLeaderboards();
                 }
-                g2d.setColor(Color.white);
-                g2d.drawImage(rbutton, 10, this.getBounds().height - 120, pnlScreen);
-                g2d.drawString("Restart", 90, this.getBounds().height - 75);
-                if (!uploaded && res.getResponseCode() == 0) {
-                    g2d.drawImage(spacebutton, 10, this.getBounds().height - 120 - 70, pnlScreen);
-                    g2d.drawString("Upload Score", 390, this.getBounds().height - 75 - 70);
-                }
-                g2d.setFont(new Font("Arial", Font.BOLD, 16));
-                g2d.drawString("You can see a leaderboard of the Top 10 players at:", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("You can see a leaderboard of the Top 10 players at:")) / 2, this.getHeight() - 80);
-                g2d.drawString("http://stacker.game-server.cc/stacker", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("http://stacker.game-server.cc/stacker")) / 2, this.getHeight() - 60);
-                if (res.getResponseCode() != 0) {
-                    uploaded = true;
-                    g2d.setFont(new Font("Arial", Font.BOLD, 40));
-                    g2d.setColor(Color.red);
-                    g2d.drawString("Could not connect to Leaderboards Server!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Could not connect to Leaderboards Server!")) / 2, this.getHeight() / 2 - 20);
-                } else {
-                    int y = this.getHeight() / 2 - 250;
-                    g2d.setFont(new Font("Arial", Font.BOLD, 40));
+                
+                if(!enteringName) {
                     g2d.setColor(Color.white);
-                    for (LeaderboardEntry entry : res.getEntries()) {
-                        g2d.drawString(entry.toString(), (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth(entry.toString())) / 2, y);
-                        y += 50;
+                    g2d.drawImage(rbutton, 10, this.getBounds().height - 120, pnlScreen);
+                    g2d.drawString("Restart", 90, this.getBounds().height - 75);
+                    if (!uploaded && res.getResponseCode() == 0) {
+                        g2d.drawImage(spacebutton, 10, this.getBounds().height - 120 - 70, pnlScreen);
+                        g2d.drawString("Upload Score", 390, this.getBounds().height - 75 - 70);
                     }
+                    g2d.setFont(new Font("Arial", Font.BOLD, 16));
+                    g2d.drawString("You can see also see the leaderboard of the Top 10 players at:", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("You can see also see the leaderboard of the Top 10 players at:")) / 2, this.getHeight() - 80);
+                    g2d.drawString("http://stacker.game-server.cc/stacker", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("http://stacker.game-server.cc/stacker")) / 2, this.getHeight() - 60);
+                    if (res.getResponseCode() != 0) {
+                        uploaded = true;
+                        g2d.setFont(new Font("Arial", Font.BOLD, 40));
+                        g2d.setColor(Color.red);
+                        g2d.drawString("Could not connect to Leaderboards Server!", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Could not connect to Leaderboards Server!")) / 2, this.getHeight() / 2 - 20);
+                    } else {
+                        int y = this.getHeight() / 2 - 250;
+                        g2d.setFont(new Font("Arial", Font.BOLD, 40));
+                        g2d.setColor(Color.white);
+                        for (LeaderboardEntry entry : res.getEntries()) {
+                            g2d.drawString(entry.toString(), (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth(entry.toString())) / 2, y);
+                            y += 50;
+                        }
+                    }
+                }
+                else {
+                    g2d.setColor(Color.white);
+                    g2d.drawString("Enter your name:", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Enter your name:")) / 2, pnlScreen.getHeight()/2 - 90);
+                    g2d.drawRect(pnlScreen.getWidth()/2 - (int)(pnlScreen.getWidth()*0.45)/2, pnlScreen.getHeight()/2 - 40, (int)(pnlScreen.getWidth()*0.45), 80);
+                    g2d.drawString(name, (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth(name)) / 2, pnlScreen.getHeight()/2 + 10);
+                    g2d.setFont(new Font("Arial", Font.BOLD, 16));
+                    g2d.drawString("Press ENTER to confirm", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Press ENTER to confirm")) / 2, pnlScreen.getHeight()/2 + 70);
+                    g2d.drawString("Press ESC to abort", (pnlScreen.getWidth() - getFontMetrics(g2d.getFont()).stringWidth("Press ESC to abort")) / 2, pnlScreen.getHeight()/2 + 90);
                 }
             }
         }
@@ -286,28 +304,14 @@ public class Game_GUI extends javax.swing.JFrame {
     }
 
     public void upload() {
-
-        if (JOptionPane.showConfirmDialog(this, "Do you want to upload your score to the online leaderboards?", "Leaderboards", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            String name = JOptionPane.showInputDialog("Please enter your name: ");
-            if (name == null) {
-                return;
-            }
-            while (name.equals("") || name.contains(";") || name.length() > 16) {
-                name = JOptionPane.showInputDialog("Please enter your name: (leave blank to abort upload)\nNames cannot contain semicolons (;) and can only be up to 16 characters long.");
-                if (name == null) {
-                    return;
-                }
-            }
-            int result = Leaderboards.addEntry(new LeaderboardEntry(name, score));
-            System.out.println(result);
-            if (result != 0) {
-                JOptionPane.showMessageDialog(this, "Sorry! Your score could not be uploaded. Please check your connection or message the developers.");
-            } else {
-                JOptionPane.showMessageDialog(this, "Your score has successfully been uploaded!");
-                res = Leaderboards.getLeaderboards();
-            }
-            uploaded = true;
+        int result = Leaderboards.addEntry(new LeaderboardEntry(name, score));
+        if (result != 0) {
+            JOptionPane.showMessageDialog(this, "Sorry! Your score could not be uploaded. Please check your connection or message the developers.\n(Error Code " + result + ")");
+            return;
+        } else {
+            res = Leaderboards.getLeaderboards();
         }
+        uploaded = true;
     }
 
     public void increaseSpeed(int value) {
@@ -318,27 +322,30 @@ public class Game_GUI extends javax.swing.JFrame {
         updateMoveTimer();
     }
     
+    public void move() {
+        if (doesMove) {
+            if (moveRight) {
+                leftMoving++;
+                if (leftMoving + movingBlocks.length >= numberOfBlocks) {
+                    moveRight = false;
+                }
+            } else {
+                leftMoving--;
+                if (leftMoving <= 0) {
+                    moveRight = true;
+                }
+            }
+        }
+    }
+    
     public void updateMoveTimer() {
         if(moveTimer != null)
             moveTimer.cancel();
         moveTimer = new Timer();
-        System.out.println("Timer started: " + movingSpeed + "ms delay");
         moveTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if (doesMove) {
-                    if (moveRight) {
-                        leftMoving++;
-                        if (leftMoving + movingBlocks.length >= numberOfBlocks) {
-                            moveRight = false;
-                        }
-                    } else {
-                        leftMoving--;
-                        if (leftMoving <= 0) {
-                            moveRight = true;
-                        }
-                    }
-                }
+                move();
             }
         }, movingSpeed, movingSpeed);
     }
@@ -398,11 +405,24 @@ public class Game_GUI extends javax.swing.JFrame {
                 }
             }
         } else {
-            if (evt.getKeyCode() == KeyEvent.VK_R) {
+            if (evt.getKeyCode() == KeyEvent.VK_R && !enteringName) {
                 reset();
+            } else if(enteringName) {
+                char c = evt.getKeyChar();
+                if(c > 31 && c < 127 && c != ';' && name.length() < 16) {
+                    name += c;
+                } else if(evt.getKeyCode() == KeyEvent.VK_BACK_SPACE && name.length() > 0) {
+                    name = name.substring(0, name.length()-1);
+                } else if(evt.getKeyCode() == KeyEvent.VK_ENTER) {
+                    enteringName = false;
+                    upload();
+                } else if(evt.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    enteringName = false;
+                }
             } else if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
                 if (!uploaded) {
-                    upload();
+                    enteringName = true;
+                    name = "";
                 }
             }
         }
