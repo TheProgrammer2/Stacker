@@ -47,8 +47,9 @@ public class Game_GUI extends javax.swing.JFrame {
     LeaderboardResponse res;
     boolean uploaded;
     boolean canDrop;
-    
+
     Timer moveTimer;
+    boolean isMusic;
 
     int fallingspeed = 40;
     LinkedList<FallingBlock> fallingBlocks;
@@ -57,7 +58,7 @@ public class Game_GUI extends javax.swing.JFrame {
     BufferedImage redBlock = ImageLoader.loadImage("redblock.png");
     BufferedImage grayBlock = ImageLoader.loadImage("grayblock.png");
     BufferedImage background = ImageLoader.loadImage("bg.png");
-    
+
     BufferedImage rbutton = ImageLoader.loadImage("rbutton.png");
     BufferedImage spacebutton = ImageLoader.loadImage("spacebutton.png");
 
@@ -78,6 +79,7 @@ public class Game_GUI extends javax.swing.JFrame {
         res = null;
         uploaded = false;
         canDrop = true;
+        isMusic = false;
         for (int i = 0; i < fixedBlocks[0].length; i++) {
             fixedBlocks[0][i] = 1;
         }
@@ -141,7 +143,10 @@ public class Game_GUI extends javax.swing.JFrame {
                             // there is a fixed block underneath so it now is a fixed block and can be removed as falling block
                             if (fixedBlocks[zeile - 1][spalte] == 1) {
                                 fixedBlocks[zeile][spalte] = 1;
-                                AudioPlayer.playAsync("blockplace");
+                                if (!isMusic) {
+                                    isMusic = true;
+                                    AudioPlayer.playAsync("blockplace");
+                                }
                                 score++;
                                 toRemove.add(f);
                                 hasSettled = true;
@@ -159,6 +164,7 @@ public class Game_GUI extends javax.swing.JFrame {
                     }
                 }
 
+                isMusic = false;
                 if (score >= scoreInterval * musicStep && musicStep < 6) {
                     musicStep++;
                     AudioPlayer.playLoopAsync("bgm" + musicStep);
@@ -170,10 +176,9 @@ public class Game_GUI extends javax.swing.JFrame {
                     AudioPlayer.hardLoopEnd();
                     AudioPlayer.playAsync("gameover");
                 } else if (passedSettleRow) {
-                    if(settleCount != movingBlocks.length) {
+                    if (settleCount != movingBlocks.length) {
                         increaseSpeed(-5);
-                    }
-                    else {
+                    } else {
                         increaseSpeed(3);
                     }
                     movingBlocks = new int[settleCount];
@@ -183,7 +188,7 @@ public class Game_GUI extends javax.swing.JFrame {
                     doesMove = true;
                     topMoving -= blockWidth;
                 }
-                
+
                 for (FallingBlock f : toRemove) {
                     fallingBlocks.remove(f);
                 }
@@ -262,7 +267,7 @@ public class Game_GUI extends javax.swing.JFrame {
                 g2d.setColor(Color.white);
                 g2d.drawImage(rbutton, 10, this.getBounds().height - 120, pnlScreen);
                 g2d.drawString("Restart", 90, this.getBounds().height - 75);
-                if(!uploaded && res.getResponseCode() == 0) {
+                if (!uploaded && res.getResponseCode() == 0) {
                     g2d.drawImage(spacebutton, 10, this.getBounds().height - 120 - 70, pnlScreen);
                     g2d.drawString("Upload Score", 390, this.getBounds().height - 75 - 70);
                 }
@@ -296,17 +301,19 @@ public class Game_GUI extends javax.swing.JFrame {
             fallingBlocks.add(new FallingBlock(boundary + blockWidth * (leftMoving + i), topMoving));
         }
     }
-    
+
     public void upload() {
-        
+
         if (JOptionPane.showConfirmDialog(this, "Do you want to upload your score to the online leaderboards?", "Leaderboards", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             String name = JOptionPane.showInputDialog("Please enter your name: ");
-            if(name == null)
+            if (name == null) {
                 return;
+            }
             while (name.contains(";") || name.length() > 16) {
                 name = JOptionPane.showInputDialog("Please enter your name: (leave blank to abort upload)\nNames cannot contain semicolons (;) and can only be up to 16 characters long.");
-                if(name == null)
+                if (name == null) {
                     return;
+                }
             }
             int result = Leaderboards.addEntry(new LeaderboardEntry(name, score));
             System.out.println(result);
@@ -319,11 +326,12 @@ public class Game_GUI extends javax.swing.JFrame {
             uploaded = true;
         }
     }
-    
+
     public void increaseSpeed(int value) {
         movingSpeed -= value;
-        if(movingSpeed < 5)
+        if (movingSpeed < 5) {
             movingSpeed = 5;
+        }
         moveTimer.cancel();
         moveTimer = new Timer();
         moveTimer.schedule(new TimerTask() {
@@ -395,18 +403,18 @@ public class Game_GUI extends javax.swing.JFrame {
     private void onKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_onKeyPressed
         if (!isGameOver) {
             if (canDrop) {
-                canDrop = false;
                 if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
+                    canDrop = false;
                     drop();
                 }
             }
         } else {
             if (evt.getKeyCode() == KeyEvent.VK_R) {
                 reset();
-            }
-            else if(evt.getKeyCode() == KeyEvent.VK_SPACE) {
-                if(!uploaded)
+            } else if (evt.getKeyCode() == KeyEvent.VK_SPACE) {
+                if (!uploaded) {
                     upload();
+                }
             }
         }
     }//GEN-LAST:event_onKeyPressed
